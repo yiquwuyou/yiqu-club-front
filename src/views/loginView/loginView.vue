@@ -8,7 +8,7 @@ const router = useRouter()
 function handleLogin() {
   const inputValue = input.value.trim()
   if (/^\d+$/.test(inputValue)) { // 检查是否为纯数字
-    router.push('/dashboard') // 页面跳转到 /dashboard
+    router.push('/') // 页面跳转到 /dashboard
     ElMessage.success('登录成功')
   } else {
     ElMessage.error('请输入纯数字验证码')
