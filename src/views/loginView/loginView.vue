@@ -3,26 +3,43 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { userLoginService } from '@/api/user.js';
 import { useUserStore } from '@/stores/index.js';
-
+import { ElMessage } from 'element-plus'; // 假设使用的是 Element Plus
 
 const formModel = ref({
-  authCode: ''
+  authCode: '' // 使用的是 authCode
 });
 
 const form = ref(null); // 用于存储表单实例
 const router = useRouter();
 const userStore = useUserStore();
 
+const rules = {
+  authCode: [ // 使用的是 authCode
+    { required: true, message: '请输入验证码', trigger: 'blur' }
+  ]
+};
+
 const login = async () => {
   try {
-    const res = await userLoginService(formModel.value.authCode)
-    userStore.setSatoken(res.data.data.token)
-    ElMessage.success('登录成功')
-    router.push('/')
+    if (form.value) {
+      const valid = await form.value.validate();
+      if (!valid) return;
+    }
+
+    const res = await userLoginService(formModel.value.authCode);
+    console.log(res);
+    if (res.success && res.data && res.data.tokenValue) {
+      userStore.setSatoken(res.data.tokenValue);
+      ElMessage.success('登录成功');
+      router.push('/');
+    } else {
+      ElMessage.error('登录失败：无效的响应数据');
+    }
   } catch (error) {
-    ElMessage.error('登录失败')
+    ElMessage.error('登录失败');
+    console.error(error);
   }
-}
+};
 </script>
 
 <template>
@@ -37,7 +54,7 @@ const login = async () => {
         <div>
           <img src="../../assets/img/login_qrcode.jpg" alt="" class="login-qrcode">
         </div>
-        <el-form ref="form" :model="formModel"  class="login-form">
+        <el-form ref="form" :model="formModel" :rules="rules" class="login-form">
           <el-form-item prop="authCode" class="input-group">
             <el-input v-model="formModel.authCode" style="width: 220px; height: 35px;" placeholder="验证码" />
             <el-button @click="login" style="width: 70px; height: 35px" type="primary" plain>登录</el-button>
