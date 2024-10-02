@@ -2,7 +2,7 @@ import axios from 'axios'
 // import { useUserStore } from '@/stores/index.js'
 // import { ElMessage } from 'element-plus'
 // import router from '@/router'
-const baseURL = 'http://8.147.235.55:5000'
+const baseURL = 'http://8.147.235.55:80'
 
 const instance = axios.create({
     // TODO 1. 基础地址，超时时间
