@@ -7,6 +7,7 @@ export const useUserStore = defineStore(
     'yiqu-user',
     () => {
         const satoken = ref('');
+
         const user = ref({});
 
         const setSatoken = (newSatoken) => {
@@ -17,18 +18,12 @@ export const useUserStore = defineStore(
             satoken.value = '';
         };
 
+
         const getUser = async () => {
-            try {
-                const res = await userGetInfoService(); // 请求获取数据
-                if (res.success && res.data) {
-                    setUser(res.data);
-                } else {
-                    console.error('Failed to fetch user information.');
-                }
-            } catch (error) {
-                console.error('Error fetching user information:', error);
-            }
-        };
+            const res = await userGetInfoService()
+            // console.log("getUser",res)
+            user.value = res.data.data
+        }
 
         const setUser = (obj) => {
             user.value = obj;

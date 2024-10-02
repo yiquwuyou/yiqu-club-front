@@ -3,13 +3,12 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { userLoginService } from '@/api/user.js';
 import { useUserStore } from '@/stores/index.js';
-import { ElMessage } from 'element-plus'; // 假设使用的是 Element Plus
+
 
 const formModel = ref({
   authCode: '' // 使用的是 authCode
 });
 
-const form = ref(null); // 用于存储表单实例
 const router = useRouter();
 const userStore = useUserStore();
 
@@ -21,25 +20,15 @@ const rules = {
 
 const login = async () => {
   try {
-    if (form.value) {
-      const valid = await form.value.validate();
-      if (!valid) return;
-    }
-
-    const res = await userLoginService(formModel.value.authCode);
-    console.log(res);
-    if (res.success && res.data && res.data.tokenValue) {
-      userStore.setSatoken(res.data.tokenValue);
-      ElMessage.success('登录成功');
-      router.push('/');
-    } else {
-      ElMessage.error('登录失败：无效的响应数据');
-    }
+    const res = await userLoginService(formModel.value.authCode)
+    console.log("登录信息",res)
+    userStore.setSatoken(res.data.data.token)
+    ElMessage.success('登录成功')
+    router.push('/')
   } catch (error) {
-    ElMessage.error('登录失败');
-    console.error(error);
+    ElMessage.error('登录失败')
   }
-};
+}
 </script>
 
 <template>
