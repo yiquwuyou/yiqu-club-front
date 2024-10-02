@@ -1,17 +1,43 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { userLoginService } from '@/api/user.js'
+import { useUserStore } from '@/stores/index.js'
+import { ElMessage } from 'element-plus' // 假设使用的是 Element Plus
 
-const input = ref('')
+const formModel = ref({
+  authCode: ''
+})
+
+const form = ref(null) // 用于存储表单实例
 const router = useRouter()
+const userStore = useUserStore()
 
-function handleLogin() {
-  const inputValue = input.value.trim()
-  if (/^\d+$/.test(inputValue)) { // 检查是否为纯数字
-    router.push('/') // 页面跳转到 /dashboard
-    ElMessage.success('登录成功')
-  } else {
-    ElMessage.error('请输入纯数字验证码')
+const rules = {
+  authCode: [
+    { required: true, message: '请输入验证码', trigger: 'blur' }
+  ]
+}
+
+const login = async () => {
+  try {
+    if (form.value) {
+      // 表单验证
+      const valid = await form.value.validate()
+      if (!valid) {
+        ElMessage.error('表单验证失败，请检查输入的信息。')
+        return
+      }
+    }
+
+    const res = await userLoginService(formModel.value)
+    console.log(res.data)
+    userStore.setSatoken(res.data.satoken)
+    ElMessage.success('登录成功！')
+    router.push('/')
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('登录失败，请检查您的输入或稍后再试。')
   }
 }
 </script>
@@ -28,10 +54,12 @@ function handleLogin() {
         <div>
           <img src="../../assets/img/login_qrcode.jpg" alt="" class="login-qrcode">
         </div>
-        <div class="login-input">
-          <el-input v-model="input"  style="width: 220px; height: 35px;"  placeholder="验证码" />
-          <el-button @click="handleLogin"  style="width: 70px; height: 35px" type="primary" plain>登录</el-button>
-        </div>
+        <el-form ref="form" :model="formModel" :rules="rules" class="login-form">
+          <el-form-item prop="authCode" class="input-group">
+            <el-input v-model="formModel.authCode" style="width: 220px; height: 35px;" placeholder="验证码" />
+            <el-button @click="login" style="width: 70px; height: 35px" type="primary" plain>登录</el-button>
+          </el-form-item>
+        </el-form>
       </div>
     </div>
   </div>
@@ -84,13 +112,19 @@ function handleLogin() {
       margin-bottom: 10px;
     }
 
-    .login-input{
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-group {
       display: flex;
       justify-content: space-between;
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
     }
   }
 }
-
-
 </style>
